@@ -1,7 +1,15 @@
+import { useState } from "react";
+
 import Player from "./components/Player";
 import GameBoard from "./components/GameBoard";
 import Log from "./components/Log";
-import { useState } from "react";
+import { WINNING_COMBINATIONS } from "./winning-combinations.js";
+
+const initailGameBoard = [
+  [null, null, null],
+  [null, null, null],
+  [null, null, null],
+];
 
 function deriveActivePlayer(gameturns) {
   let currentPlayer = "X";
@@ -11,10 +19,33 @@ function deriveActivePlayer(gameturns) {
   return currentPlayer;
 }
 function App() {
-  // const [activePlayer, setActivePlayer] = useState("X");
-  const [gameturns, setGameTurns] = useState([]);
+  const [gameTurns, setGameTurns] = useState([]);
 
-  const activePlayer = deriveActivePlayer(gameturns);
+  const activePlayer = deriveActivePlayer(gameTurns);
+
+  let gameBoard = initailGameBoard;
+  let winner = null;
+  for (const turn of gameTurns) {
+    const { square, player } = turn;
+    const { row, col } = square;
+    gameBoard[row][col] = player;
+  }
+
+  for (const combination of WINNING_COMBINATIONS) {
+    const firstSquareSynbol =
+      gameBoard[combination[0].row][combination[0].column];
+    const secondSquareSynbol =
+      gameBoard[combination[1].row][combination[1].column];
+    const thirdSquareSynbol =
+      gameBoard[combination[2].row][combination[2].column];
+    if (
+      firstSquareSynbol &&
+      firstSquareSynbol === secondSquareSynbol &&
+      firstSquareSynbol === thirdSquareSynbol
+    ) {
+      winner = firstSquareSynbol;
+    }
+  }
 
   function handleSelectSqare(rowIndex, colIndex) {
     // setActivePlayer((curActivePlayer) => (curActivePlayer === "X" ? "O" : "X"));
@@ -44,9 +75,10 @@ function App() {
             isActive={activePlayer === "O"}
           />
         </ol>
-        <GameBoard onSelectSquare={handleSelectSqare} turns={gameturns} />
+        {winner && <p>Yon win, {winner} !</p>}
+        <GameBoard onSelectSquare={handleSelectSqare} board={gameBoard} />
       </div>
-      <Log turns={gameturns} />
+      <Log turns={gameTurns} />
     </main>
   );
 }
